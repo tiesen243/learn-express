@@ -3,11 +3,22 @@
 import React from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+
 export const Post = () => {
-  const { data: posts, isLoading } = useQuery({
+  const {
+    data: posts,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
       const response = await fetch('http://localhost:3001/post')
+      if (!response.ok) throw await response.json()
       return response.json() as Promise<{ data: { id: string; title: string; content: string }[] }>
     },
   })
@@ -15,60 +26,54 @@ export const Post = () => {
   const { mutate, isPending, error } = useMutation({
     mutationKey: ['createPost'],
     mutationFn: async (formData: FormData) => {
-      const data = {
-        title: formData.get('title'),
-        content: formData.get('content'),
-      }
-      console.log(data)
       const response = await fetch('http://localhost:3001/post', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: formData.get('title'),
-          content: formData.get('content'),
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData)),
       })
+      if (!response.ok)
+        throw (await response.json()) as { message: string; errors: { [key: string]: string[] } }
       return response.json()
     },
+    onSuccess: () => refetch(),
   })
-
-  console.log(error)
 
   return (
     <>
-      <section>
-        <h1>Posts</h1>
-        <ul>
-          {isLoading || !posts ? (
-            <li>Loading...</li>
-          ) : (
-            posts.data.map((post) => (
-              <li key={post.id}>
-                <h2>{post.title}</h2>
-                <p>{post.content}</p>
-              </li>
-            ))
-          )}
-        </ul>
-      </section>
-
-      <form action={mutate}>
-        <label>
+      <form action={mutate} className="flex flex-col gap-4">
+        <Label className="space-y-2">
           Title
-          <input type="text" name="title" />
-        </label>
+          <Input type="text" name="title" />
+          <p>{error?.errors?.title}</p>
+        </Label>
 
-        <label>
+        <Label className="space-y-2">
           Content
-          <textarea name="content" />
-        </label>
+          <Textarea name="content" />
+          <p>{error?.errors?.content}</p>
+        </Label>
 
-        <button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending}>
           {isPending ? 'Creating...' : 'Create'}
-        </button>
+        </Button>
       </form>
+
+      <ul>
+        {isLoading || !posts ? (
+          <li>Loading...</li>
+        ) : (
+          posts.data.map((post) => (
+            <li key={post.id}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{post.title}</CardTitle>
+                  <CardDescription>{post.content}</CardDescription>
+                </CardHeader>
+              </Card>
+            </li>
+          ))
+        )}
+      </ul>
     </>
   )
 }

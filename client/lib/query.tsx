@@ -14,3 +14,12 @@ export const QueryProvider: React.FC<React.PropsWithChildren> = ({ children }) =
   )
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>
 }
+
+declare module '@tanstack/react-query' {
+  interface Register {
+    defaultError: {
+      message: string
+      errors: { [key: string]: string[] }
+    }
+  }
+}
