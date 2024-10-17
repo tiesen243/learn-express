@@ -17,34 +17,39 @@ const formatZodError = (error: ZodError) =>
 
 export const validator =
   ({ params, body, query }: ValidatorParams) =>
-    (req: Request, res: Response, next: NextFunction) => {
-      if (params) {
-        const parsed = params.safeParse(req.params);
-        if (!parsed.success)
-          res.sendStatus(400).json({
-            message: "Validation error",
-            errors: formatZodError(parsed.error),
-          });
-        next();
-      }
+  (req: Request, res: Response, next: NextFunction) => {
+    if (params) {
+      const parsed = params.safeParse(req.params);
+      if (!parsed.success)
+        res.sendStatus(400).json({
+          message: "Validation error",
+          errors: formatZodError(parsed.error),
+        });
+      // @ts-ignore
+      req.params = parsed.data;
+      next();
+    }
 
-      if (body) {
-        const parsed = body.safeParse(req.body);
-        if (!parsed.success)
-          res.status(400).json({
-            message: "Validation error",
-            errors: formatZodError(parsed.error),
-          });
-        next();
-      }
+    if (body) {
+      const parsed = body.safeParse(req.body);
+      if (!parsed.success)
+        res.status(400).json({
+          message: "Validation error",
+          errors: formatZodError(parsed.error),
+        });
+      req.body = parsed.data;
+      next();
+    }
 
-      if (query) {
-        const parsed = query.safeParse(req.query);
-        if (!parsed.success)
-          res.status(400).json({
-            message: "Validation error",
-            errors: formatZodError(parsed.error),
-          });
-        next();
-      }
-    };
+    if (query) {
+      const parsed = query.safeParse(req.query);
+      if (!parsed.success)
+        res.status(400).json({
+          message: "Validation error",
+          errors: formatZodError(parsed.error),
+        });
+      // @ts-expect-error
+      req.query = parsed.data;
+      next();
+    }
+  };

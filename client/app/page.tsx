@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import { Post } from './_components/post'
 
 const Page: NextPage = async () => (
-  <main className="container">
+  <main className="container py-4">
     <Post />
   </main>
 )

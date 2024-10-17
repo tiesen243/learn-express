@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
@@ -8,22 +8,27 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { DeleteBtn } from './delete-btn'
 
-export const Post = () => {
+export const Post: React.FC = () => {
+  const [page, setPage] = useState<number>(1)
+
   const {
     data: posts,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['posts', page],
     queryFn: async () => {
-      const response = await fetch('http://localhost:3001/post')
+      const response = await fetch(`http://localhost:3001/post?page=${page}&limit=2`)
       if (!response.ok) throw await response.json()
-      return response.json() as Promise<{ data: { id: string; title: string; content: string }[] }>
+      return response.json() as Promise<{
+        data: { posts: { id: string; title: string; content: string }[]; totalPage: number }
+      }>
     },
   })
 
-  const { mutate, isPending, error } = useMutation({
+  const createPost = useMutation({
     mutationKey: ['createPost'],
     mutationFn: async (formData: FormData) => {
       const response = await fetch('http://localhost:3001/post', {
@@ -40,31 +45,32 @@ export const Post = () => {
 
   return (
     <>
-      <form action={mutate} className="flex flex-col gap-4">
-        <Label className="space-y-2">
+      <form action={createPost.mutate} className="flex flex-col gap-4">
+        <Label htmlFor="title">
           Title
-          <Input type="text" name="title" />
-          <p>{error?.errors?.title}</p>
+          <Input type="text" name="title" className="my-2" />
+          <p className="text-xs text-destructive">{createPost.error?.errors?.title}</p>
         </Label>
 
-        <Label className="space-y-2">
+        <Label htmlFor="content">
           Content
-          <Textarea name="content" />
-          <p>{error?.errors?.content}</p>
+          <Textarea name="content" className="my-2" />
+          <p className="text-xs text-destructive">{createPost.error?.errors?.content}</p>
         </Label>
 
-        <Button type="submit" disabled={isPending}>
-          {isPending ? 'Creating...' : 'Create'}
+        <Button type="submit" disabled={createPost.isPending}>
+          {createPost.isPending ? 'Creating...' : 'Create'}
         </Button>
       </form>
 
-      <ul>
+      <ul className="mt-4 space-y-4">
         {isLoading || !posts ? (
           <li>Loading...</li>
         ) : (
-          posts.data.map((post) => (
+          posts.data.posts.map((post) => (
             <li key={post.id}>
-              <Card>
+              <Card className="relative">
+                <DeleteBtn id={post.id} />
                 <CardHeader>
                   <CardTitle>{post.title}</CardTitle>
                   <CardDescription>{post.content}</CardDescription>
@@ -74,6 +80,21 @@ export const Post = () => {
           ))
         )}
       </ul>
+
+      <div className="mt-4 flex items-center justify-center gap-4">
+        <Button onClick={() => setPage((prev) => prev - 1)} disabled={page === 1}>
+          Previous
+        </Button>
+        <span>
+          Page {page} of {posts?.data.totalPage}
+        </span>
+        <Button
+          onClick={() => setPage((prev) => prev + 1)}
+          disabled={page >= posts?.data.totalPage}
+        >
+          Next
+        </Button>
+      </div>
     </>
   )
 }
