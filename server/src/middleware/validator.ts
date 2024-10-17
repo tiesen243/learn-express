@@ -1,18 +1,50 @@
-import type { Request, Response, NextFunction } from "express";
-import { ZodError, type ZodObject } from "zod";
+import type { NextFunction, Request, Response } from "express";
+import type { AnyZodObject, ZodError } from "zod";
+
+interface ValidatorParams {
+  params?: AnyZodObject;
+  body?: AnyZodObject;
+  query?: AnyZodObject;
+}
+
+const formatZodError = (error: ZodError) =>
+  Object.fromEntries(
+    Object.entries(error.flatten().fieldErrors).map(([key, value]) => [
+      key,
+      value?.[0],
+    ]),
+  );
 
 export const validator =
-  (schema: ZodObject<any, any>) =>
-  (req: Request, res: Response, next: NextFunction) => {
-    try {
-      req.body = schema.parse(req.body);
-      next();
-    } catch (e) {
-      if (e instanceof ZodError)
-        res.sendStatus(400).json({
-          message: "Validation Error",
-          errors: e.flatten().fieldErrors,
-        });
-      else res.sendStatus(500).json({ error: "Internal Server Error" });
-    }
-  };
+  ({ params, body, query }: ValidatorParams) =>
+    (req: Request, res: Response, next: NextFunction) => {
+      if (params) {
+        const parsed = params.safeParse(req.params);
+        if (!parsed.success)
+          res.sendStatus(400).json({
+            message: "Validation error",
+            errors: formatZodError(parsed.error),
+          });
+        next();
+      }
+
+      if (body) {
+        const parsed = body.safeParse(req.body);
+        if (!parsed.success)
+          res.status(400).json({
+            message: "Validation error",
+            errors: formatZodError(parsed.error),
+          });
+        next();
+      }
+
+      if (query) {
+        const parsed = query.safeParse(req.query);
+        if (!parsed.success)
+          res.status(400).json({
+            message: "Validation error",
+            errors: formatZodError(parsed.error),
+          });
+        next();
+      }
+    };

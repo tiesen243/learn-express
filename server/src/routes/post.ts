@@ -1,17 +1,17 @@
 import { Router } from "express";
-import { validator } from "../middleware/validator";
 import { z } from "zod";
+import { validator } from "../middleware/validator";
 
 export const postRouter = Router();
 
 postRouter.post(
   "/",
-  validator(
-    z.object({
-      title: z.string(),
-      content: z.string(),
+  validator({
+    body: z.object({
+      title: z.string().min(1, "Title is required"),
+      content: z.string().min(4, "Content is required"),
     }),
-  ),
+  }),
   async (req, res) => {
     const post = await req.db.post.create({
       data: {
