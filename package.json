@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch ./src/app.ts",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
@@ -11,10 +13,18 @@
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate"
   },
+  "dependencies": {
+    "@prisma/client": "5.21.1",
+    "express": "^5.0.1"
+  },
   "devDependencies": {
+    "@eslint/js": "^9.13.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
     "@types/bun": "latest",
+    "@types/eslint": "^9.6.1",
+    "@types/express": "^5.0.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.10.0"
   }
 }
