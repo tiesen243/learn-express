@@ -27,7 +27,7 @@ export const logger = (req: Request, res: Response, next: NextFunction) => {
   res.once('finish', () => {
     const execTime = new Date().valueOf() - startTime.valueOf()
     console.log(
-      `${codeColor}${res.statusCode}\x1b[0m ${methodColor}[${req.method}]\x1b[0m ${req.path} took ${execTime}ms to execute`,
+      `${codeColor}${res.statusCode}\x1b[0m ${methodColor}[${req.method}]\x1b[0m ${req.originalUrl} took ${execTime}ms to execute`,
     )
     if (Object.keys(req.query).length) console.log('Query:', req.query)
     if (req.body) console.log('Body:', req.body)
