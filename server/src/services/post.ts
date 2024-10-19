@@ -3,7 +3,7 @@ import type { Request, Response } from 'express'
 import { PostDto } from '../dto/post'
 
 class PostService {
-  constructor(private postDto: PostDto = new PostDto()) {}
+  constructor(private postDto: PostDto = new PostDto()) { }
 
   async getPosts(req: Request, res: Response) {
     const posts = await req.db.post.findMany({ orderBy: { createdAt: 'desc' } })
