@@ -4,7 +4,7 @@
  */
 declare namespace Express {
   export interface Request {
-    startTime: Date
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     db: import('@prisma/client').PrismaClient
   }
 }

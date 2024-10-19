@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint'
 
 const base = tseslint.config(
   {
-    files: ['**/*.js', '**/*.ts', '**/*.tsx'],
+    files: ['**/*.js', '**/*.ts'],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -34,6 +34,6 @@ const base = tseslint.config(
 )
 
 /** @type {import('typescript-eslint').Config} */
-const config = [{ ignores: [] }, ...base]
+const config = [{ ignores: ['dist'] }, ...base]
 
 export default config

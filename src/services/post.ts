@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
-import { PostDto } from 'src/dto/post'
+
+import { PostDto } from '../dto/post'
 
 class PostService {
   constructor(private postDto: PostDto = new PostDto()) {}
@@ -24,7 +25,10 @@ class PostService {
 
   async updatePost(req: Request, res: Response) {
     const post = await req.db.post.findUnique({ where: { id: req.params.id } })
-    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' })
+      return
+    }
 
     const data = this.postDto.updatePost.parse(req.body)
     await req.db.post.update({ where: { id: req.params.id }, data })
@@ -33,7 +37,11 @@ class PostService {
 
   async deletePost(req: Request, res: Response) {
     const post = await req.db.post.findUnique({ where: { id: req.params.id } })
-    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' })
+      return
+    }
+
     await req.db.post.delete({ where: { id: req.params.id } })
     res.json({ message: 'Post deleted successfully' })
   }
