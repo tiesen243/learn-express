@@ -1,5 +1,0 @@
-# Variables
-@baseUrl=http://localhost:3000
-
-### Get all posts
-GET {{ baseUrl }}/post

@@ -1,7 +1,7 @@
 /** @typedef {import("prettier").Config} PrettierConfig */
 /** @typedef {import("@ianvs/prettier-plugin-sort-imports").PluginConfig} SortImportsConfig */
 
-/** @type { PrettierConfig | SortImportsConfig | TailwindConfig } */
+/** @type { PrettierConfig | SortImportsConfig } */
 const config = {
   semi: false,
   tabWidth: 2,

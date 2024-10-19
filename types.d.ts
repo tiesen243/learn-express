@@ -4,6 +4,7 @@
  */
 declare namespace Express {
   export interface Request {
+    startTime: Date
     db: import('@prisma/client').PrismaClient
   }
 }

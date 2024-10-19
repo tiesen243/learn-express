@@ -1,19 +1,20 @@
 import { Router } from 'express'
 
+import { postService } from '../services/post'
+
 export const postRouter = Router()
 
-postRouter.get('/', async (req, res) => {
-  const posts = await req.db.post.findMany()
+// [GET] /api/post
+postRouter.get('/', postService.getPosts.bind(postService))
 
-  if (posts.length <= 0) {
-    res.status(404).json({
-      data: [],
-      message: 'No posts found',
-    })
-  }
+// [GET] /api/post/:id
+postRouter.get('/:id', postService.getPost.bind(postService))
 
-  res.json({
-    data: posts,
-    message: 'Posts fetched successfully',
-  })
-})
+// [POST] /api/post
+postRouter.post('/', postService.createPost.bind(postService))
+
+// [PATCH] /api/post/:id
+postRouter.patch('/:id', postService.updatePost.bind(postService))
+
+// [DELETE] /api/post/:id
+postRouter.delete('/:id', postService.deletePost.bind(postService))
